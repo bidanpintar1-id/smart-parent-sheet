@@ -1,0 +1,1193 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Smart Parent Sheet — Kalkulator Tumbuh Kembang &amp; Skrining Bayi Mandiri | bidansmart.id</title>
+<meta name="description" content="Kalkulator usia &amp; KPSP, skrining tanda bahaya bayi baru lahir, serta panduan stimulasi dan grafik tumbuh kembang untuk orang tua dan pengasuh bayi 0–24 bulan.">
+<meta name="theme-color" content="#7A2940">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#FBF6EC;
+  --paper:#FFFDF8;
+  --paper-soft:#FAF4E8;
+  --ink:#2B241F;
+  --ink-soft:#73685C;
+  --ink-faint:#A99C8C;
+  --line:#E7DCC8;
+  --maroon:#7A2940;
+  --maroon-dark:#5A1E30;
+  --maroon-bg:#F4E4E9;
+  --teal:#1F6F73;
+  --teal-dark:#13494C;
+  --teal-bg:#E2F0EF;
+  --green:#357A53;
+  --green-bg:#E5F2E9;
+  --amber:#A66A12;
+  --amber-bg:#FBF0DA;
+  --red:#B23A2D;
+  --red-bg:#FBE6E2;
+  --shadow:0 6px 20px rgba(43,36,32,0.07);
+  --shadow-sm:0 2px 8px rgba(43,36,32,0.06);
+  --radius:16px;
+  --radius-sm:10px;
+  --font-display:'Fraunces',serif;
+  --font-body:'Plus Jakarta Sans',-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font-family:var(--font-body);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:64px;
+}
+.container{max-width:740px;margin:0 auto;padding:0 18px;}
+h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0 0 8px;color:var(--ink);letter-spacing:-0.01em;}
+p{margin:0 0 10px;color:var(--ink);}
+small{color:var(--ink-soft);}
+a{color:var(--teal-dark);}
+::selection{background:var(--maroon);color:#fff;}
+:focus-visible{outline:2.5px solid var(--teal);outline-offset:2px;border-radius:4px;}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+
+/* ============ HEADER / NAV ============ */
+header.topbar{position:sticky;top:0;z-index:40;background:var(--bg);border-bottom:1px solid var(--line);}
+.brand-row{display:flex;align-items:center;gap:11px;padding:14px 0 4px;}
+.brand-mark{
+  width:40px;height:40px;border-radius:11px;background:var(--maroon);color:#fff;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  font-family:var(--font-mono);font-weight:700;font-size:.72rem;letter-spacing:.02em;
+  transform:rotate(-5deg);box-shadow:var(--shadow-sm);
+}
+.brand-text{flex:1;min-width:0;}
+.brand-name{font-family:var(--font-display);font-weight:600;font-size:1.22rem;line-height:1.1;}
+.brand-tag{font-family:var(--font-mono);font-size:.62rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.09em;}
+.brand-owner{font-family:var(--font-mono);font-size:.66rem;color:var(--maroon);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;}
+
+.tabs{display:flex;gap:5px;padding:10px 0 0;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.01em;
+  padding:9px 13px 11px;border-radius:10px 10px 0 0;white-space:nowrap;
+  background:var(--paper-soft);color:var(--ink-soft);border:1px solid var(--line);border-bottom:none;
+  cursor:pointer;flex-shrink:0;transition:background .15s,color .15s;
+}
+.tab-btn b{color:inherit;opacity:.55;margin-right:5px;}
+.tab-btn.active{background:var(--paper);color:var(--maroon);box-shadow:0 -2px 0 var(--maroon) inset;}
+.tab-btn.active b{opacity:1;}
+.tab-btn:hover:not(.active){background:var(--paper);}
+
+/* ============ LAYOUT ============ */
+main{padding-top:18px;}
+.tab-panel{display:none;animation:fadein .35s ease;}
+.tab-panel.active{display:block;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+.hero{padding:6px 0 2px;}
+.eyebrow{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal-dark);margin-bottom:6px;display:block;}
+.hero h1{font-size:1.5rem;max-width:30ch;}
+.hero p{color:var(--ink-soft);max-width:48ch;font-size:.93rem;}
+
+/* warning card (top, prominent, scrolls with page) */
+.warn-card{
+  display:flex;gap:11px;align-items:flex-start;background:var(--maroon-bg);
+  border:1px solid #E0BFC9;border-radius:var(--radius-sm);padding:13px 14px;margin:14px 0 18px;
+}
+.warn-card .wicon{flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--maroon);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:.8rem;}
+.warn-card p{font-size:.83rem;color:var(--maroon-dark);margin:0;}
+.warn-card strong{color:var(--maroon-dark);}
+
+/* persistent slim disclaimer bar fixed at bottom */
+.disclaimer-bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:var(--maroon-dark);color:#F6E9EC;
+  font-size:.72rem;line-height:1.35;padding:9px 16px;
+  display:flex;align-items:center;gap:9px;
+}
+.disclaimer-bar .dicon{flex-shrink:0;font-family:var(--font-mono);font-weight:700;border:1.4px solid #F6E9EC;border-radius:50%;
+  width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:.62rem;}
+.disclaimer-bar span.txt{flex:1;}
+.disclaimer-bar b{color:#fff;}
+
+/* ============ CARDS ============ */
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:19px 19px 20px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
+.card h2{font-size:1.03rem;display:flex;align-items:center;gap:9px;}
+.card h2 .badge2{
+  font-family:var(--font-mono);font-size:.62rem;font-weight:700;color:var(--teal-dark);background:var(--teal-bg);
+  padding:3px 7px;border-radius:6px;letter-spacing:.03em;
+}
+.card .sub{color:var(--ink-soft);font-size:.83rem;margin-top:-4px;margin-bottom:14px;}
+.card-foot{font-size:.78rem;color:var(--ink-faint);margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);}
+
+/* ============ FORM ELEMENTS ============ */
+.field{margin-bottom:13px;}
+.field label{display:block;font-size:.8rem;font-weight:600;color:var(--ink);margin-bottom:5px;}
+.field .hint{font-size:.74rem;color:var(--ink-soft);margin-top:4px;}
+input[type=text],input[type=date],input[type=number],select,textarea{
+  width:100%;font-family:var(--font-body);font-size:.92rem;color:var(--ink);
+  background:var(--paper);border:1.4px solid var(--line);border-radius:var(--radius-sm);
+  padding:10px 12px;transition:border-color .15s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--teal);outline:none;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media (max-width:480px){.grid2{grid-template-columns:1fr;}}
+
+/* choice chips — reused for binary toggles & multi-option screening answers */
+.choice-group{display:flex;flex-wrap:wrap;gap:8px;}
+.choice-group.vertical{flex-direction:column;}
+.choice-btn{
+  font-family:var(--font-body);font-size:.86rem;text-align:left;color:var(--ink);
+  background:var(--paper);border:1.5px solid var(--line);border-radius:11px;
+  padding:10px 13px;cursor:pointer;transition:.14s;line-height:1.35;
+}
+.choice-btn:hover{border-color:var(--ink-faint);}
+.choice-group.binary .choice-btn{min-width:84px;text-align:center;font-weight:600;border-radius:999px;padding:8px 18px;}
+.choice-btn.sel-teal{background:var(--teal);border-color:var(--teal);color:#fff;}
+.choice-btn.sel-green{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.choice-btn.sel-amber{background:var(--amber-bg);border-color:var(--amber);color:var(--amber);}
+.choice-btn.sel-red{background:var(--red-bg);border-color:var(--red);color:var(--red);}
+.choice-btn .opt-status{display:inline-block;margin-left:8px;font-family:var(--font-mono);font-size:.62rem;font-weight:700;letter-spacing:.03em;opacity:.85;}
+
+button.btn{
+  font-family:var(--font-body);font-weight:700;font-size:.88rem;cursor:pointer;
+  border:none;border-radius:999px;padding:11px 20px;transition:.15s;
+}
+.btn-primary{background:var(--teal);color:#fff;}
+.btn-primary:hover{background:var(--teal-dark);}
+.btn-ghost{background:transparent;color:var(--ink-soft);border:1.4px solid var(--line);}
+.btn-ghost:hover{border-color:var(--ink-faint);color:var(--ink);}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+
+/* ============ STAMP (signature element) ============ */
+.stamp-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0 4px;text-align:center;}
+.stamp{
+  width:132px;height:132px;border-radius:50%;border:3px solid currentColor;position:relative;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transform:rotate(-7deg);font-family:var(--font-mono);flex-shrink:0;
+  animation:stampIn .4s cubic-bezier(.2,1.4,.4,1);
+}
+@keyframes stampIn{from{opacity:0;transform:rotate(-7deg) scale(.6);}to{opacity:1;transform:rotate(-7deg) scale(1);}}
+.stamp::before{content:'';position:absolute;inset:7px;border:1px solid currentColor;border-radius:50%;opacity:.45;}
+.stamp .s-label{font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;opacity:.8;}
+.stamp .s-main{font-size:1.5rem;font-weight:700;line-height:1.05;margin:2px 0;}
+.stamp .s-sub{font-size:.58rem;letter-spacing:.04em;opacity:.75;}
+.stamp.c-green{color:var(--green);}
+.stamp.c-amber{color:var(--amber);}
+.stamp.c-red{color:var(--red);}
+.verdict-text{max-width:46ch;}
+.verdict-text p{font-size:.88rem;}
+.verdict-note{font-size:.76rem;color:var(--ink-faint);max-width:42ch;}
+
+/* status pill */
+.pill{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:.66rem;font-weight:700;
+  letter-spacing:.03em;padding:3px 9px;border-radius:999px;}
+.pill-green{background:var(--green-bg);color:var(--green);}
+.pill-amber{background:var(--amber-bg);color:var(--amber);}
+.pill-red{background:var(--red-bg);color:var(--red);}
+.pill-grey{background:var(--paper-soft);color:var(--ink-faint);border:1px solid var(--line);}
+
+/* recommendation box */
+.reco-box{margin-top:9px;padding:10px 12px;border-radius:10px;font-size:.83rem;border-left:3px solid;}
+.reco-green{background:var(--green-bg);border-color:var(--green);color:#234E36;}
+.reco-amber{background:var(--amber-bg);border-color:var(--amber);color:#6B4709;}
+.reco-red{background:var(--red-bg);border-color:var(--red);color:#7A261C;}
+
+/* question / parameter card */
+.qcard{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px;background:var(--paper);}
+.qcard .qhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:9px;}
+.qcard .qnum{font-family:var(--font-mono);font-size:.68rem;color:var(--ink-faint);font-weight:700;flex-shrink:0;}
+.qcard .qtext{font-size:.88rem;flex:1;}
+
+/* progress bar */
+.progress-track{height:7px;background:var(--paper-soft);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin:4px 0 2px;}
+.progress-fill{height:100%;background:var(--teal);border-radius:99px;transition:width .3s;}
+.progress-label{font-family:var(--font-mono);font-size:.7rem;color:var(--ink-soft);display:flex;justify-content:space-between;}
+
+/* age display */
+.age-display{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:8px 0 4px;}
+.age-num-block{display:flex;align-items:baseline;gap:7px;}
+.age-num{font-family:var(--font-mono);font-size:2.5rem;font-weight:700;color:var(--maroon);line-height:1;}
+.age-unit{font-family:var(--font-mono);font-size:.85rem;color:var(--ink-soft);}
+.age-meta{font-size:.78rem;color:var(--ink-soft);}
+
+/* divider with eyebrow label */
+.section-divider{display:flex;align-items:center;gap:10px;margin:26px 0 12px;}
+.section-divider .label{font-family:var(--font-mono);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-faint);white-space:nowrap;}
+.section-divider .ln{flex:1;height:1px;background:var(--line);}
+
+/* growth tab specific */
+.metric-toggle{display:flex;gap:6px;margin-bottom:14px;}
+.metric-toggle button{flex:1;font-family:var(--font-mono);font-size:.72rem;font-weight:600;padding:8px 6px;border-radius:9px;
+  border:1.4px solid var(--line);background:var(--paper);color:var(--ink-soft);cursor:pointer;}
+.metric-toggle button.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+.chart-wrap{position:relative;height:240px;margin:8px 0 6px;}
+table.glog{width:100%;border-collapse:collapse;font-size:.81rem;margin-top:6px;}
+table.glog th{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-faint);
+  text-align:left;padding:6px 6px;border-bottom:1.4px solid var(--line);}
+table.glog td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle;}
+table.glog tr:last-child td{border-bottom:none;}
+.glog-empty{text-align:center;color:var(--ink-faint);font-size:.82rem;padding:22px 10px;}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--ink-faint);font-size:.95rem;padding:2px 5px;}
+.icon-btn:hover{color:var(--red);}
+
+/* stim category cards */
+.stim-grid{display:grid;grid-template-columns:1fr;gap:11px;}
+.stim-card{border:1px solid var(--line);border-radius:12px;padding:13px 14px;background:var(--paper);display:flex;gap:12px;}
+.stim-tag{flex-shrink:0;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);font-weight:700;font-size:.68rem;color:#fff;}
+.stim-card p{font-size:.85rem;margin:0;}
+.stim-card h3{font-size:.86rem;margin-bottom:3px;}
+
+/* footer */
+footer{margin-top:30px;padding:20px 0 50px;border-top:1px solid var(--line);}
+footer .fbrand{font-family:var(--font-mono);font-size:.7rem;color:var(--ink-faint);letter-spacing:.03em;}
+footer .flinks{font-size:.76rem;color:var(--ink-soft);margin-top:6px;}
+
+.no-print{}
+@media print{
+  header.topbar,.disclaimer-bar,.btn-row,.tabs{display:none!important;}
+  body{padding-bottom:0;background:#fff;}
+  .card{box-shadow:none;}
+  -webkit-print-color-adjust:exact;print-color-adjust:exact;
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="container">
+    <div class="brand-row">
+      <div class="brand-mark">SPS</div>
+      <div class="brand-text">
+        <div class="brand-name">Smart Parent Sheet</div>
+        <div class="brand-tag">Kalkulator &amp; skrining tumbuh kembang bayi</div>
+      </div>
+      <div class="brand-owner">bidansmart.id</div>
+    </div>
+    <nav class="tabs" id="tabNav">
+      <button class="tab-btn active" data-tab="1"><b>01</b>Usia &amp; KPSP</button>
+      <button class="tab-btn" data-tab="2"><b>02</b>Bayi Baru Lahir</button>
+      <button class="tab-btn" data-tab="3"><b>03</b>Stimulasi &amp; Grafik</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="container">
+
+  <div class="hero">
+    <span class="eyebrow">Untuk orang tua &amp; pengasuh · usia 0–24 bulan</span>
+    <h1>Pantau tumbuh kembang si kecil, langsung dari rumah.</h1>
+    <p>Tiga alat bantu dalam satu tempat: kalkulator usia &amp; KPSP, skrining tanda bahaya bayi baru lahir, dan panduan stimulasi dengan grafik pertumbuhan. Disusun oleh Dosen Kebidanan.</p>
+  </div>
+
+  <div class="warn-card">
+    <div class="wicon">!</div>
+    <p><strong>Penting dibaca:</strong> Smart Parent Sheet adalah alat skrining &amp; pemantauan mandiri untuk membantu orang tua di rumah. Hasil pada alat ini <strong>bukan diagnosis</strong> dan <strong>tidak menggantikan</strong> pemeriksaan oleh dokter, bidan, atau tenaga kesehatan profesional. Jika muncul tanda bahaya atau Anda merasa khawatir, segera hubungi Puskesmas/fasilitas kesehatan terdekat.</p>
+  </div>
+
+  <!-- ===================== TAB 1 ===================== -->
+  <section class="tab-panel active" id="tab1">
+
+    <div class="card">
+      <h2><span class="badge2">01</span> Identitas &amp; Usia Kronologis</h2>
+      <div class="field">
+        <label for="c-name">Nama anak</label>
+        <input type="text" id="c-name" placeholder="Contoh: Aisyah">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Jenis kelamin</label>
+          <div class="choice-group binary" id="c-gender">
+            <button class="choice-btn" data-val="Laki-laki">Laki-laki</button>
+            <button class="choice-btn" data-val="Perempuan">Perempuan</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="c-dob">Tanggal lahir anak</label>
+          <input type="date" id="c-dob">
+        </div>
+      </div>
+      <div class="field">
+        <label for="c-exam">Tanggal periksa</label>
+        <input type="date" id="c-exam">
+        <div class="hint">Otomatis terisi hari ini — boleh diubah jika mengisi data untuk pemeriksaan sebelumnya.</div>
+      </div>
+      <div class="field">
+        <label>Lahir prematur?</label>
+        <div class="choice-group binary" id="c-prem">
+          <button class="choice-btn sel-teal" data-val="Tidak">Tidak</button>
+          <button class="choice-btn" data-val="Ya">Ya</button>
+        </div>
+      </div>
+      <div class="field" id="c-prem-weeks-wrap" style="display:none;">
+        <label for="c-prem-weeks">Usia kehamilan saat lahir (minggu)</label>
+        <input type="number" id="c-prem-weeks" min="20" max="36" placeholder="Contoh: 34">
+        <div class="hint">Digunakan untuk menghitung usia terkoreksi.</div>
+      </div>
+
+      <div id="age-result-area"></div>
+    </div>
+
+    <div class="section-divider"><span class="label">Skrining KPSP</span><div class="ln"></div></div>
+
+    <div class="card" id="kpsp-card">
+      <h2><span class="badge2">KPSP</span> Kuesioner Pra Skrining Perkembangan</h2>
+      <div id="kpsp-body"></div>
+    </div>
+
+  </section>
+
+  <!-- ===================== TAB 2 ===================== -->
+  <section class="tab-panel" id="tab2">
+
+    <div class="card">
+      <h2><span class="badge2">02</span> Identitas Bayi</h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="n-name">Nama bayi</label>
+          <input type="text" id="n-name" placeholder="Contoh: Rafa">
+        </div>
+        <div class="field">
+          <label for="n-age">Usia bayi (hari)</label>
+          <input type="number" id="n-age" min="0" max="28" placeholder="0–28">
+        </div>
+      </div>
+      <div class="hint">Tab ini ditujukan untuk bayi baru lahir berusia 0–28 hari (periode neonatus).</div>
+    </div>
+
+    <div id="newborn-params"></div>
+
+    <div class="card" id="newborn-summary"></div>
+
+  </section>
+
+  <!-- ===================== TAB 3 ===================== -->
+  <section class="tab-panel" id="tab3">
+
+    <div class="card">
+      <h2><span class="badge2">03a</span> Panduan Stimulasi Sesuai Usia</h2>
+      <div id="stim-body"></div>
+    </div>
+
+    <div class="section-divider"><span class="label">KMS Digital</span><div class="ln"></div></div>
+
+    <div class="card">
+      <h2><span class="badge2">03b</span> Catat Hasil Penimbangan</h2>
+      <div class="sub">Simpan satu data per bulan usia. Data akan langsung muncul di tabel dan grafik di bawah.</div>
+      <div class="grid2">
+        <div class="field">
+          <label for="g-month">Usia saat diukur (bulan)</label>
+          <select id="g-month"></select>
+        </div>
+        <div class="field">
+          <label for="g-weight">Berat badan (kg)</label>
+          <input type="number" step="0.1" id="g-weight" placeholder="Contoh: 7.2">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="g-height">Panjang/tinggi badan (cm)</label>
+          <input type="number" step="0.1" id="g-height" placeholder="Contoh: 65.5">
+        </div>
+        <div class="field">
+          <label for="g-head">Lingkar kepala (cm)</label>
+          <input type="number" step="0.1" id="g-head" placeholder="Contoh: 42.0">
+        </div>
+      </div>
+      <div class="field">
+        <label for="g-note">Catatan / imunisasi</label>
+        <input type="text" id="g-note" placeholder="Contoh: Imunisasi DPT-3, batuk ringan">
+      </div>
+      <div class="btn-row no-print">
+        <button class="btn btn-primary" id="g-save">Simpan data bulan ini</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="badge2">Grafik</span> Grafik Pertumbuhan</h2>
+      <div class="sub">Garis putus-putus menunjukkan median referensi WHO sesuai jenis kelamin anak (diisi di Tab 1).</div>
+      <div class="metric-toggle" id="metric-toggle">
+        <button data-m="weight" class="active">Berat Badan</button>
+        <button data-m="height">Panjang/Tinggi</button>
+        <button data-m="head">Lingkar Kepala</button>
+      </div>
+      <div class="chart-wrap"><canvas id="growthChart"></canvas></div>
+      <div class="card-foot">Grafik referensi median WHO bersifat <strong>pendekatan umum</strong> untuk panduan awal, bukan kurva pertumbuhan resmi (KMS/Buku KIA). Status gizi yang akurat harus dievaluasi oleh tenaga kesehatan menggunakan kurva pertumbuhan resmi.</div>
+      <div class="btn-row no-print" style="margin-top:12px;"><button class="btn btn-primary" id="growth-pdf">Unduh Laporan Tumbuh Kembang (PDF)</button></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="badge2">Log</span> Riwayat Data Tersimpan</h2>
+      <div id="glog-table"></div>
+    </div>
+
+  </section>
+
+</div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="fbrand">© 2026 BIDANSMART.ID — SMART PARENT SHEET</div>
+    <div class="flinks">Disusun oleh Dosen Kebidanan untuk mendukung pemantauan tumbuh kembang anak 0–24 bulan di rumah. Seluruh hasil pada alat ini bersifat skrining awal, bukan diagnosis medis.</div>
+  </div>
+</footer>
+
+<div class="disclaimer-bar">
+  <span class="dicon">!</span>
+  <span class="txt"><b>Bukan pengganti diagnosis dokter/nakes.</b> Selalu konsultasikan hasil ke bidan, dokter, atau Puskesmas terdekat.</span>
+</div>
+
+<script>
+/* ======================================================================
+   DATA
+====================================================================== */
+const KPSP_RANGES = ["0–3 bulan","4–6 bulan","7–9 bulan","10–12 bulan","13–15 bulan","16–18 bulan","19–21 bulan","22–24 bulan"];
+
+const KPSP_Q = [
+[ // 0-3 bulan
+"Saat bayi telentang, apakah ia dapat mengikuti gerakan Anda dengan menggerakkan kepalanya dari kanan ke kiri atau sebaliknya?",
+"Apakah bayi dapat mengeluarkan suara-suara lain selain menangis (mengoceh/cooing)?",
+"Saat bayi telungkup di bidang datar, apakah ia dapat mengangkat kepalanya?",
+"Apakah bayi tersenyum kembali ketika Anda tersenyum atau mengajaknya bicara?",
+"Saat bayi telentang, apakah ia menggerakkan kedua lengan dan tungkainya dengan sama aktif?",
+"Apakah bayi terkejut atau berkedip saat mendengar suara tepukan tangan yang keras?",
+"Apakah bayi dapat menatap mata Anda dengan fokus saat Anda menyusuinya?",
+"Apakah bayi memberikan respons (gerakan/suara) saat didekati?",
+"Saat Anda menggendong bayi tegak, apakah lehernya sudah tidak lemas?",
+"Apakah bayi tertidur dengan tenang setelah mendapatkan cukup ASI?"
+],
+[ // 4-6 bulan
+"Saat bayi telentang, apakah ia dapat menegakkan kepalanya sebentar saat diangkat?",
+"Apakah bayi berbalik dari telentang ke telungkup atau sebaliknya?",
+"Apakah bayi tersenyum atau tertawa keras saat Anda mengajaknya bermain?",
+"Apakah bayi dapat menggenggam mainan yang diletakkan di tangannya?",
+"Apakah bayi dapat mengarahkan matanya mengikuti mainan yang digerakkan berputar?",
+"Jika Anda mendudukkan bayi (dengan bantuan), apakah punggungnya bisa tegak?",
+"Apakah bayi mendengarkan atau menoleh saat mendengar suara musik/TV?",
+"Apakah bayi meraih benda yang berada di luar jangkauannya?",
+"Apakah bayi memperhatikan tangannya sendiri secara intens?",
+"Apakah bayi berteriak gembira atau memekik saat melihat mainan menarik?"
+],
+[ // 7-9 bulan
+"Apakah bayi dapat duduk sendiri tanpa bantuan selama beberapa detik?",
+"Apakah bayi dapat memindahkan mainan dari satu tangan ke tangan lainnya?",
+"Apakah bayi mengoceh dengan suku kata ganda (seperti: ba-ba, da-da)?",
+"Apakah bayi bereaksi memalingkan kepala saat namanya dipanggil lembut?",
+"Apakah bayi dapat mencari mainan/benda yang dijatuhkan di dekatnya?",
+"Apakah bayi takut atau cemas saat melihat orang asing/baru?",
+"Apakah bayi suka bermain 'ci-ba-ba' dengan Anda?",
+"Apakah bayi dapat memegang biskuitnya sendiri dan memakannya?",
+"Apakah bayi dapat mempertahankan posisi berdiri jika kedua ketiaknya dipegang?",
+"Apakah bayi dapat merangkak atau mengesot untuk mendekati mainan?"
+],
+[ // 10-12 bulan
+"Apakah anak dapat berdiri sendiri tanpa berpegangan selama beberapa detik?",
+"Apakah anak dapat membungkuk untuk mengambil mainan tanpa terjatuh?",
+"Apakah anak dapat mengucapkan kata 'mama' atau 'papa' secara spesifik?",
+"Apakah anak dapat bertepuk tangan atau melambaikan tangan (bye-bye)?",
+"Apakah anak dapat menjimpit benda kecil (seperti kismis) menggunakan jempol dan telunjuk?",
+"Apakah anak dapat berdiri dengan mantap sambil berpegangan pada kursi/meja?",
+"Apakah anak dapat merangkak atau bergeser di lantai dengan aktif?",
+"Apakah anak akan menoleh jika ada suara langkah kaki/pintu dibuka?",
+"Apakah anak mencoba meniru bunyi atau suara yang kita keluarkan?",
+"Apakah anak dapat melangkah 1–2 langkah sambil dituntun kedua tangannya?"
+],
+[ // 13-15 bulan
+"Apakah anak sudah bisa berjalan beberapa langkah tanpa dibantu?",
+"Apakah anak dapat menumpuk 2 buah balok/mainan ke atas?",
+"Apakah anak dapat memasukkan benda kecil ke dalam botol atau wadah?",
+"Apakah anak dapat menirukan kata-kata sederhana yang Anda ucapkan?",
+"Apakah anak dapat memperlihatkan keinginan dengan menunjuk tanpa menangis?",
+"Apakah anak bisa menggelindingkan atau melempar bola kecil ke depan?",
+"Apakah anak dapat minum dari cangkir/gelas yang dipegang dengan kedua tangan?",
+"Apakah anak menoleh dan mencari saat dipanggil namanya dari arah belakang?",
+"Apakah anak sudah bisa memeluk orang tua atau boneka kesayangannya?",
+"Apakah anak dapat melambaikan tangan tanda perpisahan tanpa disuruh?"
+],
+[ // 16-18 bulan
+"Apakah anak dapat berjalan mundur beberapa langkah?",
+"Apakah anak dapat menunjuk ke arah benda yang diinginkannya?",
+"Apakah anak dapat menumpuk 3–4 balok menjadi sebuah menara?",
+"Apakah anak sudah bisa berjalan dengan lancar tanpa terjatuh-jatuh lagi?",
+"Apakah anak dapat menggelengkan kepala tanda 'tidak' atau mengangguk 'ya'?",
+"Apakah anak dapat menirukan pekerjaan rumah tangga sederhana (misal: menyapu)?",
+"Apakah anak sudah bisa mengucapkan minimal 4–6 kata yang jelas artinya?",
+"Apakah anak dapat makan makanan padat sendiri menggunakan tangannya?",
+"Apakah anak dapat melepas mainan atau benda dari genggamannya secara sukarela?",
+"Apakah anak memperlihatkan rasa cemburu atau sayang pada anggota keluarga?"
+],
+[ // 19-21 bulan
+"Apakah anak dapat menendang bola kecil ke depan tanpa kehilangan keseimbangan?",
+"Apakah anak sudah bisa mengucapkan 2–3 kata yang memiliki arti?",
+"Apakah anak dapat memegang gelas sendiri dan minum tanpa banyak tumpah?",
+"Apakah anak dapat mengikuti perintah sederhana (misal: 'Ambil bola itu')?",
+"Apakah anak dapat menunjukkan minimal 1 bagian tubuh saat ditanya?",
+"Apakah anak suka meniru gerakan atau aktivitas yang dilakukan orang dewasa?",
+"Apakah anak dapat menyusun kembali mainan ke dalam wadahnya?",
+"Apakah anak dapat berjalan naik undakan dengan tangan dipegang?",
+"Apakah anak bisa membuka halaman buku cerita (meski beberapa lembar sekaligus)?",
+"Apakah anak dapat berlari kecil tanpa sering terjatuh?"
+],
+[ // 22-24 bulan
+"Apakah anak dapat menaiki tangga atau undakan sendiri dengan berpegangan?",
+"Apakah anak dapat mencoret-coret kertas dengan pensil atau krayon?",
+"Apakah anak dapat meletakkan 4 buah balok menjadi menara ke atas?",
+"Apakah anak dapat menggunakan sendok untuk makan sendiri tanpa banyak tumpah?",
+"Apakah anak dapat membantu melepas pakaiannya sendiri (seperti jaket/kaos kaki)?",
+"Apakah anak bisa mengucapkan kalimat pendek berisi 2 kata (misal: 'mau minum')?",
+"Apakah anak dapat mengenali dirinya sendiri saat melihat di cermin?",
+"Apakah anak dapat menunjukkan ketertarikan bermain dekat anak seusianya?",
+"Apakah anak dapat menendang bola besar ke depan tanpa terjatuh?",
+"Apakah anak bisa menyisir rambut atau meniru menyikat gigi sendiri?"
+]
+];
+
+const NEWBORN_PARAMS = [
+{key:'temp',label:'Suhu Tubuh',options:[
+  {v:'Normal (36.5–37.5°C)',s:'AMAN',r:'Suhu bayi bagus. Pertahankan suhu ruangan tetap hangat dan nyaman.'},
+  {v:'Dingin (di bawah 36.5°C)',s:'HIPOTERMI',r:'BAHAYA! Bayi kedinginan. Lakukan metode kanguru (dekap kulit-ke-kulit di dada Ibu), beri ASI, dan ukur ulang dalam 1 jam. Jika tetap dingin, segera bawa ke fasilitas kesehatan.'},
+  {v:'Demam/panas (di atas 37.5°C)',s:'DEMAM',r:'BAHAYA! Jangan selimuti bayi terlalu tebal, beri ASI lebih sering, dan segera bawa ke bidan/dokter untuk pemeriksaan kemungkinan infeksi.'}
+]},
+{key:'skin',label:'Warna Kulit',options:[
+  {v:'Kemerahan / normal',s:'AMAN',r:'Kondisi kulit normal. Jemur bayi di pagi hari secara aman (opsional, sebelum pukul 9 pagi).'},
+  {v:'Kuning hanya di wajah',s:'WASPADA',r:'Gencarkan pemberian ASI 8–12 kali sehari dan jemur pagi. Pantau apakah warna kuning bertambah ke area tubuh bagian bawah.'},
+  {v:'Kuning sampai dada / perut',s:'WASPADA',r:'Gencarkan pemberian ASI 8–12 kali sehari dan jemur pagi. Pantau apakah warna kuning bertambah ke area tubuh bagian bawah.'},
+  {v:'Kuning sampai lengan / tungkai / kaki',s:'BAHAYA',r:'DARURAT! Tanda kuning yang sudah tinggi. Berisiko pada kondisi serius. Segera bawa ke rumah sakit untuk pemeriksaan kadar bilirubin.'},
+  {v:'Pucat / kebiruan',s:'BAHAYA',r:'DARURAT! Tanda kemungkinan kekurangan oksigen. Jangan ditunda, segera bawa ke rumah sakit terdekat.'}
+]},
+{key:'feeding',label:'Frekuensi Menyusu',options:[
+  {v:'Kuat (8–12 kali per hari)',s:'AMAN',r:'Pertahankan pola menyusu setiap 2–3 jam sekali, termasuk malam hari.'},
+  {v:'Lemah / malas menyusu',s:'WASPADA',r:'Coba bangunkan bayi setiap 2 jam, rangsang dengan menyentuh telapak kakinya agar mau menyusu. Pantau kecukupan ASI lewat jumlah popok basah.'},
+  {v:'Tidak bisa menyusu sama sekali',s:'DARURAT',r:'DARURAT! Bayi berisiko mengalami hipoglikemia (gula darah turun) dan dehidrasi berat. Segera bawa ke fasilitas kesehatan terdekat.'}
+]},
+{key:'urine',label:'Buang Air Kecil (BAK)',options:[
+  {v:'6 kali atau lebih per hari',s:'AMAN',r:'Asupan cairan bayi tercukupi dengan baik.'},
+  {v:'Kurang dari 6 kali per hari',s:'DEHIDRASI',r:'BAHAYA! Kemungkinan bayi kurang cairan. Tingkatkan frekuensi menyusu segera. Jika dalam 12 jam berikutnya tetap kurang dari 6 kali, bawa ke bidan/dokter.'}
+]},
+{key:'cord',label:'Tali Pusat',options:[
+  {v:'Kering &amp; bersih',s:'AMAN',r:'Pertahankan tali pusat tetap kering dan terbuka tanpa dibungkus apa pun.'},
+  {v:'Basah, tapi tidak berbau',s:'PANTAU',r:'Bersihkan dengan kasa steril dan biarkan kering sendiri. Jangan beri bedak, ramuan, atau bahan apa pun di atasnya.'},
+  {v:'Kemerahan di pangkal / berbau / bernanah',s:'INFEKSI',r:'BAHAYA! Tanda infeksi tali pusat (omfalitis) yang berisiko menyebar. Segera bawa ke dokter untuk penanganan, kemungkinan perlu antibiotik.'}
+]},
+{key:'breathing',label:'Pola Napas',options:[
+  {v:'Normal, tenang (40–60×/menit)',s:'AMAN',r:'Pola napas bayi normal.'},
+  {v:'Napas cepat (di atas 60×/menit)',s:'DARURAT',r:'DARURAT! Tanda gangguan napas. Jangan ditunda, segera bawa ke IGD rumah sakit terdekat.'},
+  {v:'Ada tarikan dinding dada ke dalam / merintih',s:'DARURAT',r:'DARURAT! Tanda gawat napas yang serius. Jangan ditunda, segera bawa ke IGD rumah sakit terdekat.'}
+]}
+];
+
+const STIM_RANGES = ["0–3 bulan","4–6 bulan","7–9 bulan","10–12 bulan","13–18 bulan","19–24 bulan"];
+const STIM = {
+kasar:["Latih bayi melakukan tummy time (tengkurap) di dada Ibu atau kasur datar selama 1–2 menit, sesering mungkin, untuk memperkuat otot lehernya.",
+"Bantu bayi belajar berguling ke kanan dan kiri dengan memancingnya menggunakan mainan berbunyi di sisi tubuhnya.",
+"Dudukkan bayi di lantai dengan sanggaan bantal di sekelilingnya, letakkan mainan agak jauh di depannya agar ia belajar meraih.",
+"Biarkan anak belajar berdiri tegak dengan berpegangan pada furnitur yang kokoh (meja/kursi) atau ajak melangkah perlahan.",
+"Ajak anak bermain melempar dan menangkap bola plastik besar, atau berjalan mundur dengan aman di atas matras.",
+"Latih anak melompat di tempat dengan kedua kaki bersamaan, atau ajak berjalan jinjit beberapa langkah."],
+halus:["Letakkan mainan kerincingan kecil yang aman di genggaman jarinya untuk merangsang refleks menggenggam.",
+"Berikan mainan dengan berbagai tekstur (halus, kasar, berbulu) agar ia belajar meraba dan memindahkan mainan antar tangan.",
+"Berikan finger food berukuran pas di tangannya, seperti potongan wortel kukus, untuk melatih koordinasi jemari.",
+"Ajak anak bermain menjimpit benda kecil (seperti remah biskuit) menggunakan ibu jari dan telunjuknya.",
+"Sediakan balok kayu besar dan ajak anak menyusunnya hingga membentuk menara 2–3 tingkat.",
+"Latih anak mencoret-coret kertas menggunakan krayon besar, atau ajak membuka-tutup botol plastik berulir."],
+bicara:["Tatap matanya dan ajak mengobrol sesering mungkin. Tirukan suara ocehannya untuk merangsang interaksi dua arah.",
+"Panggil namanya dari berbagai arah (kiri, kanan, belakang) untuk melihat apakah ia menoleh mencari sumber suara.",
+"Perkenalkan nama benda di sekitarnya secara berulang dengan artikulasi jelas, misal 'bo-la', 'mi-num'.",
+"Ajarkan bahasa isyarat sederhana, seperti melambaikan tangan 'bye-bye' atau bertepuk tangan saat gembira.",
+"Bacakan buku cerita bergambar besar, tunjuk gambarnya dan sebutkan namanya. Minta anak meniru suara hewan di buku.",
+"Latih anak mengucapkan kalimat pendek dua kata untuk menyampaikan keinginannya, misal 'mau mimi', 'minta jajan'."],
+sosial:["Gendong dan peluk bayi dengan penuh kasih sayang saat ia menangis untuk membangun rasa aman (basic trust).",
+"Ajak bayi bermain 'ci-luk-ba' di depan cermin agar ia mulai mengenali bayangan dirinya sendiri.",
+"Biarkan bayi melambaikan tangan kepada anggota keluarga lain, atau bermain bersama kakak/adiknya di rumah.",
+"Ajak anak makan bersama di meja makan keluarga, biarkan ia mencoba memegang sendoknya sendiri meski masih berantakan.",
+"Ajak anak membantu merapikan mainannya sendiri ke dalam wadah setelah selesai bermain.",
+"Mulai latih anak memakai atau melepas celana longgarnya sendiri, secara mandiri saat mandi atau berganti pakaian."]
+};
+function stimBracket(a){ if(a<=3)return 0; if(a<=6)return 1; if(a<=9)return 2; if(a<=12)return 3; if(a<=18)return 4; return 5; }
+
+const WHO = {
+boy:{
+  weight:[3.3,4.5,5.6,6.4,7.0,7.5,7.9,8.3,8.6,8.9,9.2,9.4,9.6,9.9,10.1,10.3,10.5,10.7,10.9,11.1,11.3,11.5,11.8,12.0,12.2],
+  height:[49.9,54.7,58.4,61.4,63.9,65.9,67.6,69.2,70.6,72.0,73.3,74.5,75.7,76.9,78.0,79.1,80.2,81.2,82.3,83.2,84.2,85.1,86.0,86.9,87.8],
+  head:[34.5,37.3,39.1,40.5,41.6,42.6,43.3,44.0,44.5,45.0,45.4,45.8,46.1,46.4,46.7,46.9,47.2,47.4,47.6,47.8,48.0,48.1,48.3,48.4,48.6]
+},
+girl:{
+  weight:[3.2,4.2,5.1,5.8,6.4,6.9,7.3,7.6,7.9,8.2,8.5,8.7,8.9,9.2,9.4,9.6,9.8,10.0,10.2,10.4,10.6,10.9,11.1,11.3,11.5],
+  height:[49.1,53.7,57.1,59.8,62.1,64.0,65.7,67.3,68.7,70.1,71.5,72.8,74.0,75.2,76.4,77.5,78.6,79.7,80.7,81.7,82.7,83.7,84.6,85.5,86.4],
+  head:[33.9,36.5,38.3,39.5,40.6,41.5,42.2,42.8,43.4,43.8,44.2,44.6,44.9,45.2,45.4,45.7,45.9,46.1,46.2,46.4,46.6,46.7,46.9,47.0,47.2]
+}
+};
+const METRIC_LABEL = {weight:'Berat Badan (kg)', height:'Panjang/Tinggi (cm)', head:'Lingkar Kepala (cm)'};
+
+/* ======================================================================
+   STATE
+====================================================================== */
+const state = {
+  child:{ name:'', gender:'', dob:'', exam:'', premature:'Tidak', prematureWeeks:'' },
+  kpspAnswers:{}, kpspBracket:null,
+  newborn:{ name:'', ageDays:'', params:{} },
+  growth:{ entries:{}, metric:'weight' }
+};
+
+function todayISO(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function fmtMonth(m){ return m+' bln'; }
+
+/* ======================================================================
+   TAB SWITCHING
+====================================================================== */
+document.getElementById('tabNav').addEventListener('click', e=>{
+  const btn = e.target.closest('.tab-btn'); if(!btn) return;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab'+btn.dataset.tab).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+/* ======================================================================
+   CHOICE GROUP HELPER (generic binary / status toggles)
+====================================================================== */
+function wireBinary(containerId, onChange){
+  const el = document.getElementById(containerId);
+  el.addEventListener('click', e=>{
+    const b = e.target.closest('.choice-btn'); if(!b) return;
+    [...el.children].forEach(c=>c.classList.remove('sel-teal'));
+    b.classList.add('sel-teal');
+    onChange(b.dataset.val);
+  });
+}
+
+/* ======================================================================
+   TAB 1: AGE + KPSP
+====================================================================== */
+wireBinary('c-gender', v=>{ state.child.gender=v; renderTab3(); });
+wireBinary('c-prem', v=>{
+  state.child.premature=v;
+  document.getElementById('c-prem-weeks-wrap').style.display = (v==='Ya') ? 'block':'none';
+  recomputeAge();
+});
+
+document.getElementById('c-name').addEventListener('input', e=>state.child.name=e.target.value);
+document.getElementById('c-dob').addEventListener('change', e=>{ state.child.dob=e.target.value; recomputeAge(); });
+document.getElementById('c-exam').addEventListener('change', e=>{ state.child.exam=e.target.value; recomputeAge(); });
+document.getElementById('c-prem-weeks').addEventListener('input', e=>{ state.child.prematureWeeks=e.target.value; recomputeAge(); });
+
+(function initDates(){
+  const t = todayISO();
+  document.getElementById('c-exam').value = t;
+  state.child.exam = t;
+})();
+
+function monthsBetween(dobStr, examStr){
+  if(!dobStr) return null;
+  const dob = new Date(dobStr+'T00:00:00');
+  const exam = examStr ? new Date(examStr+'T00:00:00') : new Date();
+  if(isNaN(dob)||isNaN(exam)||exam<dob) return null;
+  let m = (exam.getFullYear()-dob.getFullYear())*12 + (exam.getMonth()-dob.getMonth());
+  if(exam.getDate() < dob.getDate()) m--;
+  return Math.max(0,m);
+}
+
+function recomputeAge(){
+  const raw = monthsBetween(state.child.dob, state.child.exam);
+  const area = document.getElementById('age-result-area');
+  if(raw===null){
+    area.innerHTML = `<p class="hint" style="margin-top:6px;">Isi tanggal lahir anak untuk menghitung usia secara otomatis.</p>`;
+    document.getElementById('kpsp-body').innerHTML = `<p class="hint">Lengkapi data anak di atas untuk memunculkan pertanyaan skrining sesuai usianya.</p>`;
+    state.kpspBracket = null;
+    return;
+  }
+  let corrected = raw;
+  let isCorrected = false;
+  if(state.child.premature==='Ya' && state.child.prematureWeeks){
+    const w = parseFloat(state.child.prematureWeeks);
+    if(!isNaN(w) && w>0){
+      corrected = Math.max(0, raw - Math.round((w*7)/30));
+      isCorrected = true;
+    }
+  }
+  area.innerHTML = `
+    <div class="age-display">
+      <div class="age-num-block"><div class="age-num">${corrected}</div><div class="age-unit">bulan${isCorrected?' (terkoreksi)':''}</div></div>
+      ${isCorrected ? `<div class="age-meta">Usia kalender: ${raw} bulan<br>Usia terkoreksi memperhitungkan kelahiran prematur — umum digunakan untuk skrining hingga usia 24 bulan.</div>` : ''}
+    </div>`;
+
+  if(corrected>24){
+    document.getElementById('kpsp-body').innerHTML = `<p class="hint">Kalkulator KPSP ini dirancang untuk usia 0–24 bulan. Untuk anak di atas 24 bulan, gunakan instrumen skrining perkembangan standar bersama tenaga kesehatan.</p>`;
+    state.kpspBracket = null;
+    renderTab3();
+    return;
+  }
+  const bracket = kpspBracket(corrected);
+  if(bracket !== state.kpspBracket){
+    state.kpspBracket = bracket;
+    state.kpspAnswers = {};
+    renderKpspQuestions(bracket);
+  }
+  renderTab3();
+}
+function kpspBracket(a){ if(a<=3)return 0; if(a<=6)return 1; if(a<=9)return 2; if(a<=12)return 3; if(a<=15)return 4; if(a<=18)return 5; if(a<=21)return 6; return 7; }
+
+function renderKpspQuestions(bracket){
+  const body = document.getElementById('kpsp-body');
+  const qs = KPSP_Q[bracket];
+  let html = `<p class="sub" style="margin-top:-2px;">Pertanyaan untuk rentang usia <strong>${KPSP_RANGES[bracket]}</strong>. Jawab seluruh 10 pertanyaan berdasarkan kemampuan anak saat ini.</p>`;
+  html += `<div class="progress-label"><span id="kpsp-progress-text">0 / 10 terjawab</span><span id="kpsp-score-text"></span></div>
+           <div class="progress-track"><div class="progress-fill" id="kpsp-progress-fill" style="width:0%"></div></div>`;
+  qs.forEach((q,i)=>{
+    html += `<div class="qcard">
+      <div class="qhead"><span class="qnum">P${i+1}</span><span class="qtext">${q}</span></div>
+      <div class="choice-group binary" data-qi="${i}">
+        <button class="choice-btn" data-val="YA">Ya</button>
+        <button class="choice-btn" data-val="TIDAK">Tidak</button>
+      </div>
+    </div>`;
+  });
+  html += `<div id="kpsp-result"></div>
+           <div class="btn-row no-print"><button class="btn btn-primary" id="kpsp-pdf">Unduh Hasil (PDF)</button><button class="btn btn-ghost" id="kpsp-reset">Ulangi jawaban</button></div>`;
+  body.innerHTML = html;
+
+  body.querySelectorAll('.choice-group[data-qi]').forEach(group=>{
+    group.addEventListener('click', e=>{
+      const b = e.target.closest('.choice-btn'); if(!b) return;
+      [...group.children].forEach(c=>c.classList.remove('sel-teal'));
+      b.classList.add('sel-teal');
+      state.kpspAnswers[group.dataset.qi] = b.dataset.val;
+      updateKpspScore();
+    });
+  });
+  document.getElementById('kpsp-reset').addEventListener('click', ()=>{ state.kpspAnswers={}; renderKpspQuestions(state.kpspBracket); });
+  document.getElementById('kpsp-pdf').addEventListener('click', generateKpspPdf);
+}
+
+function updateKpspScore(){
+  const answered = Object.keys(state.kpspAnswers).length;
+  const yes = Object.values(state.kpspAnswers).filter(v=>v==='YA').length;
+  document.getElementById('kpsp-progress-text').textContent = answered+' / 10 terjawab';
+  document.getElementById('kpsp-progress-fill').style.width = (answered*10)+'%';
+  document.getElementById('kpsp-score-text').textContent = answered>0 ? ('Skor sementara: '+yes) : '';
+  const resultEl = document.getElementById('kpsp-result');
+  if(answered<10){ resultEl.innerHTML=''; return; }
+
+  let verdict, color, msg, reco;
+  if(yes>=9){ verdict='SESUAI'; color='green'; msg='Perkembangan anak sesuai dengan tahapan usianya.'; reco='Lanjutkan stimulasi harian dan jadwal pemeriksaan rutin di Posyandu/Puskesmas.'; }
+  else if(yes>=7){ verdict='MERAGUKAN'; color='amber'; msg='Perkembangan anak meragukan, ada beberapa kemampuan yang belum tercapai.'; reco='Lakukan stimulasi intensif sesuai panduan di Tab 3 selama 2 minggu, lalu ulangi skrining ini.'; }
+  else { verdict='PENYIMPANGAN'; color='red'; msg='Terdeteksi kemungkinan tanda penyimpangan/keterlambatan perkembangan.'; reco='Sangat disarankan segera berkonsultasi ke dokter spesialis anak atau Puskesmas untuk pemeriksaan lebih lanjut.'; }
+
+  resultEl.innerHTML = `
+    <div class="section-divider"><span class="label">Hasil</span><div class="ln"></div></div>
+    <div class="stamp-wrap">
+      <div class="stamp c-${color}"><span class="s-label">KPSP</span><span class="s-main">${yes}/10</span><span class="s-sub">${verdict}</span></div>
+      <div class="verdict-text">
+        <p><strong>${msg}</strong></p>
+        <div class="reco-box reco-${color}">${reco}</div>
+        <p class="verdict-note">Hasil ini adalah skrining awal, bukan diagnosis. Konsultasikan selalu ke tenaga kesehatan.</p>
+      </div>
+    </div>`;
+}
+
+/* ======================================================================
+   TAB 2: NEWBORN DANGER-SIGN SCREENING
+====================================================================== */
+function statusColor(s){ if(s==='AMAN') return 'green'; if(s==='WASPADA'||s==='PANTAU') return 'amber'; return 'red'; }
+
+function renderNewbornParams(){
+  const wrap = document.getElementById('newborn-params');
+  wrap.innerHTML = NEWBORN_PARAMS.map(p=>`
+    <div class="card">
+      <h2 style="font-size:.96rem;">${p.label}</h2>
+      <div class="choice-group vertical" data-key="${p.key}">
+        ${p.options.map(o=>`<button class="choice-btn" data-val="${o.v}">${o.v}</button>`).join('')}
+      </div>
+      <div class="reco-slot" id="reco-${p.key}"></div>
+    </div>
+  `).join('');
+
+  wrap.querySelectorAll('.choice-group[data-key]').forEach(group=>{
+    const key = group.dataset.key;
+    const paramDef = NEWBORN_PARAMS.find(p=>p.key===key);
+    group.addEventListener('click', e=>{
+      const b = e.target.closest('.choice-btn'); if(!b) return;
+      [...group.children].forEach(c=>c.className='choice-btn');
+      const opt = paramDef.options.find(o=>o.v===b.dataset.val);
+      const color = statusColor(opt.s);
+      b.classList.add('sel-'+color);
+      state.newborn.params[key] = opt;
+      document.getElementById('reco-'+key).innerHTML = `
+        <div class="reco-box reco-${color}"><span class="pill pill-${color}">${opt.s}</span><div style="margin-top:6px;">${opt.r}</div></div>`;
+      updateNewbornSummary();
+    });
+  });
+}
+renderNewbornParams();
+
+document.getElementById('n-name').addEventListener('input', e=>state.newborn.name=e.target.value);
+document.getElementById('n-age').addEventListener('input', e=>state.newborn.ageDays=e.target.value);
+
+function updateNewbornSummary(){
+  const total = NEWBORN_PARAMS.length;
+  const answered = Object.keys(state.newborn.params).length;
+  const el = document.getElementById('newborn-summary');
+  if(answered < total){
+    el.innerHTML = `<h2 style="font-size:.96rem;">Ringkasan Kondisi Bayi</h2>
+      <div class="progress-label"><span>${answered} / ${total} parameter dicek</span><span></span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${(answered/total)*100}%"></div></div>
+      <p class="hint" style="margin-top:8px;">Lengkapi seluruh parameter di atas untuk melihat kesimpulan menyeluruh.</p>`;
+    return;
+  }
+  const statuses = Object.values(state.newborn.params).map(o=>o.s);
+  const hasDarurat = statuses.some(s=>['DARURAT','BAHAYA','INFEKSI','DEHIDRASI','HIPOTERMI','DEMAM'].includes(s));
+  const hasWaspada = statuses.some(s=>['WASPADA','PANTAU'].includes(s));
+  let verdict,color,msg;
+  if(hasDarurat){ verdict='SEGERA KE FASILITAS KESEHATAN'; color='red'; msg='Ditemukan satu atau lebih tanda bahaya berat. Jangan ditunda — segera bawa bayi ke Puskesmas, bidan, atau rumah sakit terdekat.'; }
+  else if(hasWaspada){ verdict='BUTUH PEMANTAUAN'; color='amber'; msg='Ada kondisi ringan yang perlu dipantau lebih ketat. Hubungi bidan atau Puskesmas untuk konsultasi lanjutan.'; }
+  else { verdict='BAYI SEHAT'; color='green'; msg='Seluruh parameter dalam kondisi aman. Pertahankan pola asuhan harian Anda.'; }
+
+  el.innerHTML = `
+    <h2 style="font-size:.96rem;">Ringkasan Kondisi Bayi</h2>
+    <div class="stamp-wrap">
+      <div class="stamp c-${color}"><span class="s-label">Neonatus</span><span class="s-main" style="font-size:1.05rem;">${verdict}</span></div>
+      <div class="verdict-text">
+        <p>${msg}</p>
+        <p class="verdict-note">Hasil ini adalah skrining awal, bukan diagnosis. Jika ragu, selalu hubungi tenaga kesehatan.</p>
+      </div>
+    </div>
+    <div class="btn-row no-print" style="justify-content:center;"><button class="btn btn-primary" id="nb-pdf">Unduh Hasil (PDF)</button></div>`;
+  document.getElementById('nb-pdf').addEventListener('click', generateNewbornPdf);
+}
+updateNewbornSummary();
+
+/* ======================================================================
+   TAB 3: STIMULATION + GROWTH
+====================================================================== */
+const STIM_LABELS = {kasar:'Motorik Kasar', halus:'Motorik Halus', bicara:'Bicara &amp; Bahasa', sosial:'Sosialisasi &amp; Kemandirian'};
+const STIM_COLORS = {kasar:'var(--teal)', halus:'var(--maroon)', bicara:'#8A6A1E', sosial:'#3C6E8F'};
+const STIM_TAGS = {kasar:'GK', halus:'GH', bicara:'BB', sosial:'SK'};
+
+function renderTab3(){
+  const body = document.getElementById('stim-body');
+  const corrected = currentChildAgeMonths();
+  if(corrected===null){
+    body.innerHTML = `<p class="hint">Lengkapi data anak di Tab 1 (Usia &amp; KPSP) terlebih dahulu untuk melihat panduan stimulasi sesuai usia anak saat ini.</p>`;
+  } else {
+    const b = stimBracket(Math.min(corrected,24));
+    body.innerHTML = `<p class="sub" style="margin-top:-2px;">Usia anak saat ini: <strong>${Math.min(corrected,24)} bulan</strong> &middot; rentang panduan <strong>${STIM_RANGES[b]}</strong></p>
+      <div class="stim-grid">
+        ${Object.keys(STIM).map(k=>`
+          <div class="stim-card">
+            <div class="stim-tag" style="background:${STIM_COLORS[k]}">${STIM_TAGS[k]}</div>
+            <div><h3>${STIM_LABELS[k]}</h3><p>${STIM[k][b]}</p></div>
+          </div>`).join('')}
+      </div>`;
+  }
+  renderGrowthChart();
+}
+function currentChildAgeMonths(){
+  const raw = monthsBetween(state.child.dob, state.child.exam);
+  if(raw===null) return null;
+  if(state.child.premature==='Ya' && state.child.prematureWeeks){
+    const w = parseFloat(state.child.prematureWeeks);
+    if(!isNaN(w) && w>0) return Math.max(0, raw - Math.round((w*7)/30));
+  }
+  return raw;
+}
+
+/* growth month select */
+(function initMonthSelect(){
+  const sel = document.getElementById('g-month');
+  for(let m=0;m<=24;m++){ const o=document.createElement('option'); o.value=m; o.textContent=m+' bulan'; sel.appendChild(o); }
+})();
+
+document.getElementById('g-save').addEventListener('click', ()=>{
+  const m = parseInt(document.getElementById('g-month').value,10);
+  const w = parseFloat(document.getElementById('g-weight').value);
+  const h = parseFloat(document.getElementById('g-height').value);
+  const hc = parseFloat(document.getElementById('g-head').value);
+  const note = document.getElementById('g-note').value;
+  if(isNaN(w) && isNaN(h) && isNaN(hc)){ alert('Isi minimal salah satu data: berat, tinggi, atau lingkar kepala.'); return; }
+  state.growth.entries[m] = { weight:isNaN(w)?null:w, height:isNaN(h)?null:h, head:isNaN(hc)?null:hc, note:note||'' };
+  document.getElementById('g-weight').value=''; document.getElementById('g-height').value=''; document.getElementById('g-head').value=''; document.getElementById('g-note').value='';
+  renderGrowthLog(); renderGrowthChart();
+});
+
+document.getElementById('metric-toggle').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#metric-toggle button').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  state.growth.metric = b.dataset.m;
+  renderGrowthChart();
+});
+
+function genderKey(){ return state.child.gender==='Laki-laki' ? 'boy' : (state.child.gender==='Perempuan' ? 'girl' : null); }
+
+function weightStatus(m, w){
+  const gk = genderKey(); if(!gk) return null;
+  const median = WHO[gk].weight[m];
+  if(w < median*0.82) return {label:'Kurang', color:'red'};
+  if(w > median*1.22) return {label:'Lebih', color:'amber'};
+  return {label:'Normal', color:'green'};
+}
+
+function renderGrowthLog(){
+  const el = document.getElementById('glog-table');
+  const months = Object.keys(state.growth.entries).map(Number).sort((a,b)=>a-b);
+  if(months.length===0){ el.innerHTML = `<div class="glog-empty">Belum ada data tersimpan. Tambahkan data penimbangan di atas.</div>`; return; }
+  let html = `<table class="glog"><thead><tr><th>Usia</th><th>BB (kg)</th><th>TB (cm)</th><th>LK (cm)</th><th>Status BB</th><th></th></tr></thead><tbody>`;
+  months.forEach(m=>{
+    const e = state.growth.entries[m];
+    const st = e.weight ? weightStatus(m, e.weight) : null;
+    html += `<tr>
+      <td>${fmtMonth(m)}</td>
+      <td>${e.weight ?? '—'}</td>
+      <td>${e.height ?? '—'}</td>
+      <td>${e.head ?? '—'}</td>
+      <td>${st ? `<span class="pill pill-${st.color}">${st.label}</span>` : '<span class="pill pill-grey">—</span>'}</td>
+      <td><button class="icon-btn no-print" data-del="${m}" title="Hapus data">✕</button></td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  el.innerHTML = html;
+  el.querySelectorAll('[data-del]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ delete state.growth.entries[btn.dataset.del]; renderGrowthLog(); renderGrowthChart(); });
+  });
+}
+renderGrowthLog();
+
+let growthChart = null;
+function renderGrowthChart(){
+  const ctx = document.getElementById('growthChart');
+  const metric = state.growth.metric;
+  const gk = genderKey() || 'boy';
+  const refData = WHO[gk][metric].map((v,i)=>({x:i,y:v}));
+  const months = Object.keys(state.growth.entries).map(Number).sort((a,b)=>a-b);
+  const childData = months.filter(m=>state.growth.entries[m][metric]!=null).map(m=>({x:m,y:state.growth.entries[m][metric]}));
+
+  if(growthChart) growthChart.destroy();
+  growthChart = new Chart(ctx, {
+    type:'line',
+    data:{ datasets:[
+      { label:'Anak Anda', data:childData, borderColor:'#7A2940', backgroundColor:'#7A2940', pointRadius:4, pointHoverRadius:5, tension:.3, borderWidth:2.4 },
+      { label:'Median referensi WHO'+(genderKey()?'':' (laki-laki, default)'), data:refData, borderColor:'#9C8F7E', borderDash:[5,4], borderWidth:1.6, pointRadius:0, tension:.3 }
+    ]},
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      scales:{
+        x:{ type:'linear', min:0, max:24, ticks:{ stepSize:2, font:{family:'JetBrains Mono', size:10}, color:'#73685C' }, title:{display:true,text:'Usia (bulan)',font:{family:'Plus Jakarta Sans',size:11},color:'#73685C'}, grid:{color:'#E7DCC8'} },
+        y:{ ticks:{ font:{family:'JetBrains Mono', size:10}, color:'#73685C' }, title:{display:true,text:METRIC_LABEL[metric],font:{family:'Plus Jakarta Sans',size:11},color:'#73685C'}, grid:{color:'#E7DCC8'} }
+      },
+      plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Plus Jakarta Sans', size:11}, color:'#2B241F', boxWidth:14 } } },
+      interaction:{ intersect:false, mode:'nearest' }
+    }
+  });
+}
+
+/* ======================================================================
+   PDF REPORT GENERATION
+====================================================================== */
+const STATUS_RGB = { green:[53,122,83], amber:[166,106,18], red:[178,58,45] };
+const STATUS_BG_RGB = { green:[229,242,233], amber:[251,240,218], red:[251,230,226] };
+
+function pdfHeader(doc, title){
+  doc.setFillColor(122,41,64);
+  doc.rect(0,0,210,28,'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('SMART PARENT SHEET', 14, 12);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text('bidansmart.id', 14, 18);
+  doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text(title, 14, 24);
+  doc.setTextColor(43,36,31);
+}
+function pdfFooter(doc){
+  const pageCount = doc.internal.getNumberOfPages();
+  for(let i=1;i<=pageCount;i++){
+    doc.setPage(i);
+    doc.setDrawColor(231,220,200);
+    doc.line(14,281,196,281);
+    doc.setFont('helvetica','normal'); doc.setFontSize(7.3);
+    doc.setTextColor(115,104,92);
+    doc.text(doc.splitTextToSize('Hasil ini adalah skrining/pemantauan mandiri dan TIDAK menggantikan diagnosis dokter, bidan, atau tenaga kesehatan profesional. Jika ditemukan tanda bahaya, segera hubungi fasilitas kesehatan terdekat.',182), 14, 286);
+    doc.setFontSize(7.3);
+    doc.text('Dibuat: '+new Date().toLocaleString('id-ID')+'   |   Halaman '+i+'/'+pageCount+'   |   bidansmart.id', 14, 294);
+  }
+}
+function ensureSpace(doc, y, needed){
+  if(y + needed > 270){ doc.addPage(); return 20; }
+  return y;
+}
+
+function generateKpspPdf(){
+  if(state.kpspBracket===null){ alert('Lengkapi data anak dan jawab pertanyaan KPSP terlebih dahulu.'); return; }
+  const answered = Object.keys(state.kpspAnswers).length;
+  if(answered<10){ alert('Lengkapi seluruh 10 pertanyaan terlebih dahulu sebelum mengunduh hasil.'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  pdfHeader(doc, 'Laporan Skrining KPSP');
+
+  let y = 38;
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Identitas Anak', 14, y); y+=6.5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  const corrected = currentChildAgeMonths();
+  [
+    ['Nama anak', state.child.name||'-'],
+    ['Jenis kelamin', state.child.gender||'-'],
+    ['Tanggal lahir', state.child.dob||'-'],
+    ['Tanggal periksa', state.child.exam||'-'],
+    ['Usia saat periksa', (corrected!==null?corrected+' bulan':'-')+(state.child.premature==='Ya'?' (usia terkoreksi prematuritas)':'')]
+  ].forEach(([label,val])=>{ doc.text(label+': '+val, 14, y); y+=5.4; });
+  y+=4;
+
+  const rows = KPSP_Q[state.kpspBracket].map((q,i)=>[String(i+1), q, state.kpspAnswers[i]||'-']);
+  doc.autoTable({
+    startY:y, head:[['No','Pertanyaan Skrining ('+KPSP_RANGES[state.kpspBracket]+')','Jawaban']], body:rows,
+    margin:{left:14,right:14}, styles:{font:'helvetica',fontSize:8.3,cellPadding:2.3,textColor:[43,36,31],lineColor:[231,220,200]},
+    headStyles:{fillColor:[31,111,115],textColor:255,fontStyle:'bold',fontSize:8.3},
+    columnStyles:{0:{cellWidth:8,halign:'center'},2:{cellWidth:20,halign:'center'}},
+    alternateRowStyles:{fillColor:[250,244,232]}
+  });
+  y = doc.lastAutoTable.finalY + 8;
+
+  const yes = Object.values(state.kpspAnswers).filter(v=>v==='YA').length;
+  let verdict,color,msg,reco;
+  if(yes>=9){verdict='SESUAI';color='green';msg='Perkembangan anak sesuai dengan tahapan usianya.';reco='Lanjutkan stimulasi harian dan jadwal pemeriksaan rutin di Posyandu/Puskesmas.';}
+  else if(yes>=7){verdict='MERAGUKAN';color='amber';msg='Perkembangan anak meragukan, ada beberapa kemampuan yang belum tercapai.';reco='Lakukan stimulasi intensif sesuai panduan Tab 3 selama 2 minggu, lalu ulangi skrining ini.';}
+  else {verdict='PENYIMPANGAN';color='red';msg='Terdeteksi kemungkinan tanda penyimpangan/keterlambatan perkembangan.';reco='Sangat disarankan segera berkonsultasi ke dokter spesialis anak atau Puskesmas.';}
+
+  y = ensureSpace(doc, y, 32);
+  doc.setFillColor(...STATUS_BG_RGB[color]); doc.roundedRect(14,y,182,30,2,2,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(12.5); doc.setTextColor(...STATUS_RGB[color]);
+  doc.text('Skor: '+yes+'/10  -  '+verdict, 18, y+9);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(43,36,31);
+  doc.text(doc.splitTextToSize(msg+' '+reco, 174), 18, y+16);
+
+  pdfFooter(doc);
+  doc.save('KPSP-'+(state.child.name||'anak').replace(/\s+/g,'_')+'.pdf');
+}
+
+function generateNewbornPdf(){
+  if(Object.keys(state.newborn.params).length < NEWBORN_PARAMS.length){
+    alert('Lengkapi seluruh 6 parameter terlebih dahulu sebelum mengunduh hasil.'); return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  pdfHeader(doc, 'Laporan Skrining Tanda Bahaya Bayi Baru Lahir');
+
+  let y=38;
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Identitas Bayi', 14, y); y+=6.5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.text('Nama bayi: '+(state.newborn.name||'-'), 14, y); y+=5.4;
+  doc.text('Usia bayi: '+(state.newborn.ageDays?state.newborn.ageDays+' hari':'-'), 14, y); y+=8;
+
+  const rows = NEWBORN_PARAMS.map(p=>{ const sel=state.newborn.params[p.key]; return [p.label, sel?sel.v:'-', sel?sel.s:'-']; });
+  doc.autoTable({
+    startY:y, head:[['Parameter','Kondisi Dipilih','Status']], body:rows,
+    margin:{left:14,right:14}, styles:{font:'helvetica',fontSize:9,cellPadding:2.6,textColor:[43,36,31],lineColor:[231,220,200]},
+    headStyles:{fillColor:[122,41,64],textColor:255,fontStyle:'bold'},
+    columnStyles:{2:{cellWidth:24,halign:'center'}},
+    alternateRowStyles:{fillColor:[250,244,232]},
+    didParseCell:function(data){
+      if(data.section==='body' && data.column.index===2){
+        const c = statusColor(data.cell.raw);
+        if(STATUS_RGB[c]){ data.cell.styles.textColor = STATUS_RGB[c]; data.cell.styles.fontStyle='bold'; }
+      }
+    }
+  });
+  y = doc.lastAutoTable.finalY + 8;
+
+  y = ensureSpace(doc, y, 14);
+  doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.text('Catatan & Rekomendasi', 14, y); y+=6;
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.7);
+  NEWBORN_PARAMS.forEach(p=>{
+    const sel = state.newborn.params[p.key];
+    if(sel && sel.s!=='AMAN'){
+      y = ensureSpace(doc, y, 12);
+      const lines = doc.splitTextToSize('- '+p.label+': '+sel.r, 178);
+      doc.text(lines, 16, y); y += lines.length*4.1 + 2.5;
+    }
+  });
+
+  const statuses = Object.values(state.newborn.params).map(o=>o.s);
+  const hasDarurat = statuses.some(s=>['DARURAT','BAHAYA','INFEKSI','DEHIDRASI','HIPOTERMI','DEMAM'].includes(s));
+  const hasWaspada = statuses.some(s=>['WASPADA','PANTAU'].includes(s));
+  let verdict,color;
+  if(hasDarurat){verdict='SEGERA KE FASILITAS KESEHATAN';color='red';}
+  else if(hasWaspada){verdict='BUTUH PEMANTAUAN INTENSIF';color='amber';}
+  else {verdict='BAYI SEHAT';color='green';}
+
+  y = ensureSpace(doc, y+2, 18);
+  doc.setFillColor(...STATUS_BG_RGB[color]); doc.roundedRect(14,y,182,16,2,2,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(...STATUS_RGB[color]);
+  doc.text('Kesimpulan: '+verdict, 18, y+10);
+
+  pdfFooter(doc);
+  doc.save('Skrining-BBL-'+(state.newborn.name||'bayi').replace(/\s+/g,'_')+'.pdf');
+}
+
+function generateGrowthPdf(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  pdfHeader(doc, 'Laporan Tumbuh Kembang (KMS Digital)');
+
+  let y=38;
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Identitas Anak', 14, y); y+=6.5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  doc.text('Nama anak: '+(state.child.name||'-'), 14, y); y+=5.4;
+  doc.text('Jenis kelamin: '+(state.child.gender||'- (memengaruhi kurva referensi WHO)'), 14, y); y+=8;
+
+  if(growthChart){
+    const img = growthChart.toBase64Image('image/png',1.0);
+    doc.setFont('helvetica','bold'); doc.setFontSize(10.5);
+    doc.text('Grafik '+METRIC_LABEL[state.growth.metric], 14, y); y+=4;
+    doc.addImage(img, 'PNG', 14, y, 182, 78);
+    y += 84;
+  }
+
+  const months = Object.keys(state.growth.entries).map(Number).sort((a,b)=>a-b);
+  if(months.length){
+    const rows = months.map(m=>{
+      const e = state.growth.entries[m];
+      const st = e.weight ? weightStatus(m, e.weight) : null;
+      return [fmtMonth(m), e.weight??'-', e.height??'-', e.head??'-', st?st.label:'-', e.note||'-'];
+    });
+    doc.autoTable({
+      startY:y, head:[['Usia','BB (kg)','TB (cm)','LK (cm)','Status BB','Catatan']], body:rows,
+      margin:{left:14,right:14}, styles:{font:'helvetica',fontSize:8.3,cellPadding:2.3,textColor:[43,36,31],lineColor:[231,220,200]},
+      headStyles:{fillColor:[31,111,115],textColor:255,fontStyle:'bold'},
+      alternateRowStyles:{fillColor:[250,244,232]}
+    });
+    y = doc.lastAutoTable.finalY + 7;
+  } else {
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.text('Belum ada data penimbangan tersimpan.', 14, y); y+=8;
+  }
+
+  y = ensureSpace(doc, y, 18);
+  doc.setFont('helvetica','italic'); doc.setFontSize(7.8); doc.setTextColor(115,104,92);
+  const note = doc.splitTextToSize('Catatan: Grafik dan status referensi median WHO bersifat pendekatan umum untuk panduan awal, bukan kurva pertumbuhan resmi. Status gizi yang akurat harus dievaluasi tenaga kesehatan menggunakan kurva pertumbuhan resmi (KMS/Buku KIA).', 178);
+  doc.text(note, 14, y);
+
+  pdfFooter(doc);
+  doc.save('Tumbuh-Kembang-'+(state.child.name||'anak').replace(/\s+/g,'_')+'.pdf');
+}
+
+document.getElementById('growth-pdf').addEventListener('click', generateGrowthPdf);
+
+/* initial paint */
+recomputeAge();
+renderTab3();
+</script>
+</body>
+</html>
